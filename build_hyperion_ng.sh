@@ -2,8 +2,6 @@
 # Usage:
 # TOOLCHAIN_DIR=<path_to_webos_buildroot_toolchain> ./build_hyperion_ng.sh
 
-PATCH_LIBRT="yes"
-
 HYPERION_NG_REPO="${HYPERION_NG_REPO:-https://github.com/hyperion-project/hyperion.ng}"
 HYPERION_NG_BRANCH="${HYPERION_NG_BRANCH:-master}"
 
@@ -27,12 +25,6 @@ if [ ! -d $HYPERION_NG_DIR ]
 then
   echo ":: Cloning hyperion.ng from repo '$HYPERION_NG_REPO', branch: '$HYPERION_NG_BRANCH'"
   git clone --recursive --branch $HYPERION_NG_BRANCH $HYPERION_NG_REPO $HYPERION_NG_DIR || { echo "[-] Cloning git repo failed"; exit 1; }
-  
-  if [ ! -z $PATCH_LIBRT ]
-  then
-    echo "* Patching to force-link librt"
-    sed -i -e 's/hidapi-libusb)$/rt hidapi-libusb)/g w /dev/stdout' hyperion.ng/libsrc/leddevice/CMakeLists.txt
-  fi
 fi
 
 # Native build to have flatc compiler
