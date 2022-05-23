@@ -124,7 +124,7 @@ jobs:
             -DENABLE_DEV_USB_HID=ON \
             -DENABLE_DEV_WS281XPWM=OFF \
             -DENABLE_DEV_TINKERFORGE=ON \
-            -DENABLE_MDNS=OFF \
+            -DENABLE_MDNS=ON \
             -DENABLE_DEPLOY_DEPENDENCIES=OFF \
             -DENABLE_BOBLIGHT_SERVER=ON \
             -DENABLE_FLATBUF_SERVER=ON \
