@@ -4,6 +4,7 @@
 #include <glib.h>
 #include <pthread.h>
 
+#define LOG_NAME "hyperion.ng-loader"
 #define SERVICE_NAME "org.webosbrew.hyperion.ng.loader.service"
 #define DAEMON_PATH "/media/developer/apps/usr/palm/services/org.webosbrew.hyperion.ng.loader.service/hyperion"
 #define DAEMON_EXECUTABLE "hyperiond"
