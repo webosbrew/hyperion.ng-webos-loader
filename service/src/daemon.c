@@ -37,15 +37,17 @@ int daemon_spawn(pid_t *pid)
 
     char *env_library_path;
     char *env_armcap;
+    char *python_home;
     char *application_executable_path;
 
     asprintf(&env_library_path, "LD_LIBRARY_PATH=%s", DAEMON_PATH);
     asprintf(&env_armcap, "OPENSSL_armcap=%d", 0);
     asprintf(&application_executable_path, "%s/%s", DAEMON_PATH, DAEMON_EXECUTABLE);
+    asprintf(&python_home, "PYTHONHOME=%s/python", DAEMON_PATH);
 
-    char *env_vars[] = {env_library_path, env_armcap, "HOME=/home/root", NULL};
+    char *env_vars[] = {env_library_path, env_armcap, python_home, "HOME=/home/root", NULL};
     char *argv[] = {application_executable_path, NULL};
-    
+
     res = posix_spawn(pid, application_executable_path, NULL, NULL, argv, env_vars);
     DBG("pid=%d, application_path=%s, env={%s,%s}",
             *pid, application_executable_path, env_library_path, env_armcap);
