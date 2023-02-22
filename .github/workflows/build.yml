@@ -89,6 +89,7 @@ jobs:
             -DENABLE_V4L2=OFF \
             -DENABLE_X11=OFF \
             -DENABLE_XCB=OFF \
+            -DENABLE_AUDIO=OFF \
             -DENABLE_BOBLIGHT_SERVER=OFF \
             -DENABLE_CEC=OFF \
             -DENABLE_DEV_NETWORK=OFF \
