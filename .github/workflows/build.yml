@@ -121,6 +121,7 @@ jobs:
             -DPLATFORM=rpi \
             -DHYPERION_LIGHT=ON \
             -DENABLE_QT=OFF \
+            -DENABLE_AUDIO=OFF \
             -DENABLE_EFFECTENGINE=OFF \
             -DENABLE_JSONCHECKS=OFF \
             -DENABLE_DEV_SERIAL=ON \
