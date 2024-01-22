@@ -241,7 +241,6 @@ jobs:
           chmod +x ./dist/service/hyperion/hyperiond
           chmod +x ./dist/service/hyperion/hyperion-remote
           chmod +x ./dist/service/hyperion/flatc
-          chmod +x ./dist/service/hyperion/flathash
 
       - run: npm run package
       - run: npm run gen-manifest
