@@ -229,8 +229,9 @@ jobs:
       - name: Copy hyperion.ng into dist/service/hyperion
         run: |
           ls -R
-          mkdir -p ./dist/service/hyperion
-          cp -r ./hyperion.ng-build/* ./dist/service/hyperion/
+          rm -rf ./dist/service/hyperion
+          cp -r -T ./hyperion.ng-build ./dist/service/hyperion
+          rm -f ./dist/service/hyperion/flatc
           ls -R
 
       - name: Ensure executables +x
@@ -241,7 +242,6 @@ jobs:
 
           chmod +x ./dist/service/hyperion/hyperiond
           chmod +x ./dist/service/hyperion/hyperion-remote
-          chmod +x ./dist/service/hyperion/flatc
 
       - run: npm run package
       - run: npm run gen-manifest
