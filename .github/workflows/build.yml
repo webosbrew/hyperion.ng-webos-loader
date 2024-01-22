@@ -27,7 +27,7 @@ jobs:
         working-directory: ./hyperion.ng
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           repository: hyperion-project/hyperion.ng
           ref: 2.0.16
@@ -36,7 +36,7 @@ jobs:
           fetch-depth: 0
 
       - name: Restore/Cache build directories
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ${{ github.workspace }}/${{ env.CCACHE_DIR_NATIVE }}
@@ -53,7 +53,7 @@ jobs:
 
       - name: Cache toolchain dir
         id: cache-toolchain
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ env.TOOLCHAIN_DIR }}
           key: ${{ runner.os }}-${{ env.TOOLCHAIN_URL }}
@@ -162,7 +162,7 @@ jobs:
           find ./release
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: hyperion.ng-build
           path: ${{ github.workspace }}/hyperion.ng/release/*
@@ -173,11 +173,11 @@ jobs:
     needs: build_hyperion_ng
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: hyperion.ng-build
           path: hyperion.ng-build
@@ -186,13 +186,14 @@ jobs:
         run: ls -R
 
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
-          node-version: 14.x
+          node-version: lts/*
+          cache: npm
 
       - name: Restore toolchain cache
         id: cache-toolchain
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ env.TOOLCHAIN_DIR }}
           key: ${{ runner.os }}-${{ env.TOOLCHAIN_URL }}
@@ -246,7 +247,7 @@ jobs:
       - run: npm run gen-manifest
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: hyperion.ng-ipk
           path: |
