@@ -15,7 +15,7 @@ jobs:
     outputs:
       tag: ${{ steps.read-tag.outputs.value }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Read current tag from CI workflow
         id: read-tag
         run: echo value=$(yq -r .jobs.build_hyperion_ng.steps[0].with.ref ./.github/workflows/build.yml) >> $GITHUB_OUTPUT
@@ -28,7 +28,7 @@ jobs:
       tag: ${{ steps.read-tag.outputs.value }}
     steps:
       - name: Checkout Hyperion.NG repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: hyperion-project/hyperion.ng
           submodules: recursive
@@ -48,21 +48,21 @@ jobs:
         run: echo "pr_branch=update_daemon/${{ needs.remote_tag.outputs.tag }}" >> $GITHUB_ENV
       - name: Check if PR already exists by attempting to checkout branch
         continue-on-error: true
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.pr_branch }}
       - name: Check if PR branch cloned
         run: |
           sh -c 'if [[ -f package.json ]]; then echo "PR already exists"; exit 1; fi'
       - name: Clone master branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: master
           fetch-depth: 0
       - name: Inject latest tag into CI workflow file
         run: sed -i 's/${{ needs.local_tag.outputs.tag }}/${{ needs.remote_tag.outputs.tag }}/' ./.github/workflows/build.yml
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v5
         with:
           add-paths: .github/workflows/build.yml
           title: "[Daemon] Bump Hyperion.NG to ${{ needs.remote_tag.outputs.tag }}"

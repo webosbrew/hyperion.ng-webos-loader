@@ -6,7 +6,7 @@ on:
   workflow_call:
 
 env:
-  TOOLCHAIN_URL: https://github.com/openlgtv/buildroot-nc4/releases/download/webos-c592d84/arm-webos-linux-gnueabi_sdk-buildroot.tar.gz
+  TOOLCHAIN_URL: https://github.com/openlgtv/buildroot-nc4/releases/download/webos-d7ed7ee/arm-webos-linux-gnueabi_sdk-buildroot.tar.gz
   TOOLCHAIN_DIR: /opt/arm-webos-linux-gnueabi_sdk-buildroot
   TOOLCHAIN_ENV_FILE: /opt/arm-webos-linux-gnueabi_sdk-buildroot/environment-setup
   TOOLCHAIN_FILE: /opt/arm-webos-linux-gnueabi_sdk-buildroot/share/buildroot/toolchainfile.cmake
@@ -27,16 +27,16 @@ jobs:
         working-directory: ./hyperion.ng
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           repository: hyperion-project/hyperion.ng
-          ref: 2.0.15
+          ref: 2.0.16
           path: hyperion.ng
           submodules: recursive
           fetch-depth: 0
 
       - name: Restore/Cache build directories
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ${{ github.workspace }}/${{ env.CCACHE_DIR_NATIVE }}
@@ -48,12 +48,12 @@ jobs:
 
       - name: Create build directories
         run: |
-          mkdir -p ./${{ env.BUILD_DIR_NATIVE }}
-          mkdir -p ./${{ env.BUILD_DIR_CROSS }}
+          mkdir -p -- "./${{ env.BUILD_DIR_NATIVE }}"
+          mkdir -p -- "./${{ env.BUILD_DIR_CROSS }}"
 
       - name: Cache toolchain dir
         id: cache-toolchain
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ env.TOOLCHAIN_DIR }}
           key: ${{ runner.os }}-${{ env.TOOLCHAIN_URL }}
@@ -62,12 +62,12 @@ jobs:
         if: steps.cache-toolchain.outputs.cache-hit != 'true'
         working-directory: /opt
         run: |
-          wget -q -O toolchain.tar.gz ${TOOLCHAIN_URL}
+          wget -q -O toolchain.tar.gz -- "${TOOLCHAIN_URL}"
           tar xf toolchain.tar.gz
-          pushd ${TOOLCHAIN_DIR}
+          pushd -- "${TOOLCHAIN_DIR}"
           ./relocate-sdk.sh
           popd
-          find ${TOOLCHAIN_DIR}/bin -type f -iname "perl*" -delete
+          find -- "${TOOLCHAIN_DIR}/bin" -type f -iname 'perl*' -delete
 
       - name: Install native dependencies
         env:
@@ -80,7 +80,7 @@ jobs:
         env:
           CCACHE_DIR: ${{ github.workspace }}/${{ env.CCACHE_DIR_NATIVE }}
         run: |
-          pushd ./${{ env.BUILD_DIR_NATIVE }}
+          pushd -- "./${{ env.BUILD_DIR_NATIVE }}"
           cmake .. \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
@@ -114,11 +114,11 @@ jobs:
         env:
           CCACHE_DIR: ${{ github.workspace }}/${{ env.CCACHE_DIR_CROSS }}
         run: |
-          pushd ./${{ env.BUILD_DIR_CROSS }}
+          pushd -- "./${{ env.BUILD_DIR_CROSS }}"
           cmake .. \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_FILE} \
+            -DCMAKE_TOOLCHAIN_FILE="${TOOLCHAIN_FILE}" \
             -DCMAKE_BUILD_TYPE=Release \
             -DPLATFORM=rpi \
             -DHYPERION_LIGHT=ON \
@@ -137,32 +137,32 @@ jobs:
             -DENABLE_PROTOBUF_SERVER=OFF \
             -DENABLE_FORWARDER=ON \
             -DENABLE_FLATBUF_CONNECT=ON \
-            -DIMPORT_FLATC=${GITHUB_WORKSPACE}/hyperion.ng/${BUILD_DIR_NATIVE}/flatc_export.cmake
+            -DIMPORT_FLATC="${GITHUB_WORKSPACE}/hyperion.ng/${BUILD_DIR_NATIVE}/flatc_export.cmake"
           make
           popd
 
       - name: Copy built binaries to release/
         run: |
-          mkdir ./release
-          cp -r ./${{ env.BUILD_DIR_CROSS }}/bin/* ./release/
+          rm -rf ./release
+          cp -r -T -- "./${{ env.BUILD_DIR_CROSS }}/bin" ./release
           find ./release
 
       - name: Copy dependencies to release/
         env:
-          dependency_libs: libpython3.10.so.1.0 libpython3.so libpng16.so.16 libjpeg.so.8 libcrypto.so.1.1 libz.so.1 libssl.so.1.1 libQt5Sql.so.5.15.2 libpcre2-16.so.0 libQt5Gui.so.5 libQt5Network.so.5 libQt5Widgets.so.5 libk5crypto.so.3 libatomic.so.1 libQt5Core.so.5 libkrb5support.so.0 libcom_err.so.3 libstdc++.so.6 libkrb5.so.3 libQt5Sql.so.5 libgssapi_krb5.so.2 libQt5SerialPort.so.5 libQt5Sql.so.5.15 libusb-1.0.so.0
+          dependency_libs: libpython3.10.so.1.0 libpng16.so.16 libjpeg.so.8 libcrypto.so.1.1 libz.so.1 libssl.so.1.1 libpcre2-16.so.0 libQt5Gui.so.5 libQt5Network.so.5 libQt5Widgets.so.5 libk5crypto.so.3 libatomic.so.1 libQt5Core.so.5 libkrb5support.so.0 libcom_err.so.3 libstdc++.so.6 libkrb5.so.3 libQt5Sql.so.5 libgssapi_krb5.so.2 libQt5SerialPort.so.5 libusb-1.0.so.0 libudev.so.1
         run: |
-          for i in ${{ env.dependency_libs }}; do find ${TOOLCHAIN_DIR}/arm-webos-linux-gnueabi/sysroot/ -name $i -exec cp {} ./release/ \;; done
+          for i in ${{ env.dependency_libs }}; do find -- "${TOOLCHAIN_DIR}/arm-webos-linux-gnueabi/sysroot/" -name "${i}" -exec cp -t ./release -- {} \;; done
           mkdir -p ./release/sqldrivers
           mkdir -p ./release/imageformats
           mkdir -p ./release/python/lib
-          cp ${TOOLCHAIN_DIR}/arm-webos-linux-gnueabi/sysroot/usr/lib/qt/plugins/sqldrivers/libqsqlite.so ./release/sqldrivers/
-          cp ${TOOLCHAIN_DIR}/arm-webos-linux-gnueabi/sysroot/usr/lib/qt/plugins/imageformats/libqico.so ./release/imageformats/
-          cp ${TOOLCHAIN_DIR}/arm-webos-linux-gnueabi/sysroot/usr/lib/qt/plugins/imageformats/libqjpeg.so ./release/imageformats/
-          cp -r ${TOOLCHAIN_DIR}/arm-webos-linux-gnueabi/sysroot/usr/lib/python3.10 ./release/python/lib/
+          cp -t ./release/sqldrivers -- "${TOOLCHAIN_DIR}/arm-webos-linux-gnueabi/sysroot/usr/lib/qt/plugins/sqldrivers/libqsqlite.so"
+          cp -t ./release/imageformats -- "${TOOLCHAIN_DIR}/arm-webos-linux-gnueabi/sysroot/usr/lib/qt/plugins/imageformats/libqico.so"
+          cp -t ./release/imageformats -- "${TOOLCHAIN_DIR}/arm-webos-linux-gnueabi/sysroot/usr/lib/qt/plugins/imageformats/libqjpeg.so"
+          cp -r -t ./release/python/lib -- "${TOOLCHAIN_DIR}/arm-webos-linux-gnueabi/sysroot/usr/lib/python3.10"
           find ./release
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: hyperion.ng-build
           path: ${{ github.workspace }}/hyperion.ng/release/*
@@ -173,11 +173,11 @@ jobs:
     needs: build_hyperion_ng
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: hyperion.ng-build
           path: hyperion.ng-build
@@ -186,13 +186,14 @@ jobs:
         run: ls -R
 
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
-          node-version: 14.x
+          node-version: lts/*
+          cache: npm
 
       - name: Restore toolchain cache
         id: cache-toolchain
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ env.TOOLCHAIN_DIR }}
           key: ${{ runner.os }}-${{ env.TOOLCHAIN_URL }}
@@ -214,22 +215,23 @@ jobs:
       - run: npm run build -- --env production
       - name: Build service
         run: |
-          mkdir -p ./dist/service
-          rm -rf ./dist/service/*
           mkdir -p ./service/build
-          pushd service/build
+          pushd ./service/build
           cmake .. \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_FILE}
+            -DCMAKE_TOOLCHAIN_FILE="${TOOLCHAIN_FILE}"
           make
           popd
-          cp -r ./service/build/dist/* ./dist/service/
+          mkdir -p ./dist
+          rm -rf ./dist/service
+          cp -r -T -- ./service/build/dist ./dist/service
 
       - name: Copy hyperion.ng into dist/service/hyperion
         run: |
           ls -R
-          mkdir -p ./dist/service/hyperion
-          cp -r ./hyperion.ng-build/* ./dist/service/hyperion/
+          rm -rf ./dist/service/hyperion
+          cp -r -T ./hyperion.ng-build ./dist/service/hyperion
+          rm -f ./dist/service/hyperion/flatc
           ls -R
 
       - name: Ensure executables +x
@@ -240,14 +242,12 @@ jobs:
 
           chmod +x ./dist/service/hyperion/hyperiond
           chmod +x ./dist/service/hyperion/hyperion-remote
-          chmod +x ./dist/service/hyperion/flatc
-          chmod +x ./dist/service/hyperion/flathash
 
       - run: npm run package
       - run: npm run gen-manifest
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: hyperion.ng-ipk
           path: |

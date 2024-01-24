@@ -33,7 +33,7 @@ do
   chmod +x ${FILE}
 done
 
-for file in hyperiond hyperion-remote flatc flathash
+for file in hyperiond hyperion-remote
 do
   FILE="${EXEC_DIR}/dist/service/hyperion/${file}"
   echo "=> ${FILE}"
