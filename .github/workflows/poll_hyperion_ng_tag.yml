@@ -31,7 +31,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: hyperion-project/hyperion.ng
-          submodules: recursive
           fetch-depth: 0
       - name: Get latest tag of Hyperion.NG
         id: read-tag
