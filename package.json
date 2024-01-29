@@ -24,7 +24,7 @@
     "appinfo.json",
     "assets/**"
   ],
-  "author": "",
+  "author": "webosbrew.org",
   "license": "UNLICENSED",
   "devDependencies": {
     "@babel/core": "^7.14.0",
