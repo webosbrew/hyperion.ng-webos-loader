@@ -27,13 +27,13 @@
   "author": "",
   "license": "UNLICENSED",
   "devDependencies": {
-    "@webosbrew/pub-utils": "^1.0.3",
-    "@webosose/ares-cli": "^2.1.0",
+    "@webosbrew/pub-utils": "^1.1.0",
+    "@webosose/ares-cli": "^2.4.0",
     "enyo-dev": "^1.0.0",
-    "eslint": "^7.25.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-prettier": "^3.4.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.10.0",
+    "eslint-plugin-prettier": "^3.4.1",
     "npm-run-all": "^4.1.5",
-    "prettier": "^2.2.1"
+    "prettier": "^2.8.8"
   }
 }
