@@ -10,7 +10,7 @@
     "package": "ares-package dist/ -e enyo-ilib",
     "deploy": "ares-install org.webosbrew.hyperion.ng.loader_${npm_package_version}_all.ipk",
     "launch": "ares-launch org.webosbrew.hyperion.ng.loader",
-    "clean": "rm -rf dist/",
+    "clean": "rm -rf dist/ service/build/",
     "lint": "eslint .",
     "build-local": "npm-run-all --serial build-local:**",
     "build-local:frontend": "enyo pack",
@@ -24,7 +24,7 @@
     "appinfo.json",
     "assets/**"
   ],
-  "author": "",
+  "author": "webosbrew.org",
   "license": "UNLICENSED",
   "devDependencies": {
     "@babel/core": "^7.14.0",
