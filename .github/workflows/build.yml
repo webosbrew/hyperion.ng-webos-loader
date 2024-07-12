@@ -149,7 +149,7 @@ jobs:
 
       - name: Copy dependencies to release/
         env:
-          dependency_libs: libpython3.10.so.1.0 libpng16.so.16 libjpeg.so.8 libcrypto.so.1.1 libz.so.1 libssl.so.1.1 libpcre2-16.so.0 libQt5Gui.so.5 libQt5Network.so.5 libQt5Widgets.so.5 libk5crypto.so.3 libatomic.so.1 libQt5Core.so.5 libkrb5support.so.0 libcom_err.so.3 libstdc++.so.6 libkrb5.so.3 libQt5Sql.so.5 libgssapi_krb5.so.2 libQt5SerialPort.so.5 libusb-1.0.so.0 libudev.so.1 libftdi1.so.2        run: |
+          dependency_libs: libpython3.10.so.1.0 libpng16.so.16 libjpeg.so.8 libcrypto.so.1.1 libz.so.1 libssl.so.1.1 libpcre2-16.so.0 libQt5Gui.so.5 libQt5Network.so.5 libQt5Widgets.so.5 libk5crypto.so.3 libatomic.so.1 libQt5Core.so.5 libkrb5support.so.0 libcom_err.so.3 libstdc++.so.6 libkrb5.so.3 libQt5Sql.so.5 libgssapi_krb5.so.2 libQt5SerialPort.so.5 libusb-1.0.so.0 libudev.so.1         run: |
           for i in ${{ env.dependency_libs }}; do find -- "${TOOLCHAIN_DIR}/arm-webos-linux-gnueabi/sysroot/" -name "${i}" -exec cp -t ./release -- {} \;; done
           mkdir -p ./release/sqldrivers
           mkdir -p ./release/imageformats
