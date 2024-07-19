@@ -71,7 +71,7 @@ jobs:
 
       - name: Install native dependencies
         env:
-          apt_deps: ccache git cmake build-essential qtbase5-dev libftdi-dev libqt5serialport5-dev libqt5sql5-sqlite libqt5svg5-dev libqt5x11extras5-dev python3-dev libxcb-image0-dev libxcb-util0-dev libxcb-shm0-dev libxcb-render0-dev libxcb-randr0-dev libxrandr-dev libxrender-dev libturbojpeg0-dev libssl-dev libmbedtls-dev
+          apt_deps: ccache git cmake build-essential qtbase5-dev libftdi1-dev libqt5serialport5-dev libqt5sql5-sqlite libqt5svg5-dev libqt5x11extras5-dev python3-dev libxcb-image0-dev libxcb-util0-dev libxcb-shm0-dev libxcb-render0-dev libxcb-randr0-dev libxrandr-dev libxrender-dev libturbojpeg0-dev libssl-dev libmbedtls-dev
         run: |
           sudo apt update
           sudo apt install -y ${{ env.apt_deps }}
