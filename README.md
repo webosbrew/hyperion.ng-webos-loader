@@ -2,6 +2,8 @@
 Add Home Assistant Lights and Skydimmo Mode support von @Lord-Gray
 
 https://github.com/hyperion-project/hyperion.ng/pull/1763
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 Binaries are [available](https://repo.webosbrew.org/apps/org.webosbrew.hyperion.ng.loader) through [Homebrew Channel](https://github.com/webosbrew/webos-homebrew-channel).
 
