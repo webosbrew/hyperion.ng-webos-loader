@@ -19,7 +19,7 @@ HYPERION_NG_DIR="${EXEC_DIR}/hyperion.ng"
 BUILD_DIR_NATIVE="${HYPERION_NG_DIR}/build-x86x64"
 BUILD_DIR_CROSS="${HYPERION_NG_DIR}/build-cross"
 
-DEPENDENCIES="libpng16.so.16 libjpeg.so.8 libcrypto.so.1.1 libz.so.1 libssl.so.1.1 libpcre2-16.so.0 libQt5Gui.so.5 libQt5Network.so.5 libQt5Widgets.so.5 libk5crypto.so.3 libatomic.so.1 libQt5Core.so.5 libkrb5support.so.0 libcom_err.so.3 libstdc++.so.6 libkrb5.so.3 libQt5Sql.so.5 libgssapi_krb5.so.2 libQt5SerialPort.so.5 libusb-1.0.so.0 libftdi1.so.2 libudev.so.1"
+DEPENDENCIES="libpng16.so.16 libjpeg.so.8 libcrypto.so.1.1 libz.so.1 libssl.so.1.1 libpcre2-16.so.0 libQt5Gui.so.5 libQt5Network.so.5 libQt5Widgets.so.5 libk5crypto.so.3 libatomic.so.1 libQt5Core.so.5 libkrb5support.so.0 libcom_err.so.3 libstdc++.so.6 libkrb5.so.3 libQt5Sql.so.5 libgssapi_krb5.so.2 libQt5SerialPort.so.5 libusb-1.0.so.0 libudev.so.1"
 
 if [ ! -d $HYPERION_NG_DIR ]
 then
