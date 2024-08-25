@@ -3,7 +3,7 @@
 # TOOLCHAIN_DIR=<path_to_webos_buildroot_toolchain> ./build_hyperion_ng.sh
 
 HYPERION_NG_REPO="${HYPERION_NG_REPO:-https://github.com/satgit62/hyperion.ng}"
-HYPERION_NG_BRANCH="${HYPERION_NG_BRANCH:-HomeAssistant}"
+HYPERION_NG_BRANCH="${HYPERION_NG_BRANCH:-master}"
 
 # Toolchain params - No changes needed below this line
 TOOLCHAIN_DIR=${TOOLCHAIN_DIR:-$HOME/arm-webos-linux-gnueabi_sdk-buildroot}
