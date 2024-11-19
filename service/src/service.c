@@ -157,7 +157,7 @@ static bool power_callback(LSHandle* sh __attribute__((unused)), LSMessage* msg,
     service_t* service = (service_t*)data;
 
     INFO("Power status callback message: %s", LSMessageGetPayload(msg));
-
+    if (true) return true;
     jschema_info_init(&schema, jschema_all(), NULL, NULL);
     parsed = jdom_parse(j_cstr_to_buffer(LSMessageGetPayload(msg)), DOMOPT_NOOPT, &schema);
 
