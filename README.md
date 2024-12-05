@@ -1,4 +1,7 @@
 # Hyperion.NG for webOS Version	2.0.17-beta.1
+
+NV12 added by @Lord-Grey
+
 Add Home Assistant Lights and Skydimmo Mode support von @Lord-Gray
 
 https://github.com/hyperion-project/hyperion.ng/pull/1763
