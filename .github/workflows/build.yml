@@ -29,8 +29,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: satgit62/hyperion.ng
-          ref: 
+          repository: Lord-Grey/hyperion.ng
+          ref: temperture
           path: hyperion.ng
           submodules: recursive
           fetch-depth: 0
