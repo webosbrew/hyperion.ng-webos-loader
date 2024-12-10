@@ -105,7 +105,6 @@ jobs:
             -DENABLE_MDNS=OFF \
             -DENABLE_FLATBUF_CONNECT=ON \
             -DENABLE_PROTOBUF_SERVER=OFF \
-            -DENABLE_REMOTE_CTL=ON \
             -Wno-dev
           make
           popd
@@ -121,6 +120,7 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE="${TOOLCHAIN_FILE}" \
             -DCMAKE_BUILD_TYPE=Release \
             -DPLATFORM=rpi \
+            -DHYPERION_LIGHT=ON \
             -DENABLE_QT=OFF \
             -DENABLE_AUDIO=OFF \
             -DENABLE_EFFECTENGINE=ON \
