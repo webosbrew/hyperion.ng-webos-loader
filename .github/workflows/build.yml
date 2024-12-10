@@ -93,12 +93,13 @@ jobs:
             -DENABLE_XCB=OFF \
             -DENABLE_AUDIO=OFF \
             -DENABLE_BOBLIGHT_SERVER=OFF \
+            -DENABLE_CEC=OFF \
             -DENABLE_DEV_NETWORK=OFF \
             -DENABLE_DEV_SERIAL=OFF \
             -DENABLE_DEV_TINKERFORGE=OFF \
             -DENABLE_DEV_USB_HID=OFF \
             -DENABLE_EFFECTENGINE=OFF \
-            -DENABLE_REMOTE_CTL=ON \
+            -DENABLE_REMOTE_CTL=OFF \
             -DENABLE_QT=OFF \
             -DENABLE_FORWARDER=OFF \
             -DENABLE_DEV_SPI=OFF \
@@ -120,6 +121,7 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE="${TOOLCHAIN_FILE}" \
             -DCMAKE_BUILD_TYPE=Release \
             -DPLATFORM=rpi \
+            -DHYPERION_LIGHT=ON \
             -DENABLE_QT=OFF \
             -DENABLE_AUDIO=OFF \
             -DENABLE_EFFECTENGINE=ON \
@@ -135,6 +137,7 @@ jobs:
             -DENABLE_PROTOBUF_SERVER=OFF \
             -DENABLE_FORWARDER=ON \
             -DENABLE_FLATBUF_CONNECT=ON \
+            -DENABLE_REMOTE_CTL=ON \
             -DIMPORT_FLATC="${GITHUB_WORKSPACE}/hyperion.ng/${BUILD_DIR_NATIVE}/flatc_export.cmake"
           make
           popd
