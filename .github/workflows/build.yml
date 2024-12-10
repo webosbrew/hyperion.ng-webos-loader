@@ -106,6 +106,7 @@ jobs:
             -DENABLE_MDNS=OFF \
             -DENABLE_FLATBUF_CONNECT=ON \
             -DENABLE_PROTOBUF_SERVER=OFF \
+            -DENABLE_REMOTE_CTL=ON \
             -Wno-dev
           make
           popd
@@ -121,7 +122,6 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE="${TOOLCHAIN_FILE}" \
             -DCMAKE_BUILD_TYPE=Release \
             -DPLATFORM=rpi \
-            -DHYPERION_LIGHT=ON \
             -DENABLE_QT=OFF \
             -DENABLE_AUDIO=OFF \
             -DENABLE_EFFECTENGINE=ON \
@@ -135,6 +135,7 @@ jobs:
             -DENABLE_BOBLIGHT_SERVER=ON \
             -DENABLE_FLATBUF_SERVER=ON \
             -DENABLE_PROTOBUF_SERVER=OFF \
+            -DENABLE_REMOTE_CTL=ON \
             -DENABLE_FORWARDER=ON \
             -DENABLE_FLATBUF_CONNECT=ON \
             -DIMPORT_FLATC="${GITHUB_WORKSPACE}/hyperion.ng/${BUILD_DIR_NATIVE}/flatc_export.cmake"
