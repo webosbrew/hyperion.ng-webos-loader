@@ -29,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: Lord-Grey/hyperion.ng
+          repository: satgit62/hyperion.ng
           ref: temperture
           path: hyperion.ng
           submodules: recursive
@@ -121,7 +121,7 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE="${TOOLCHAIN_FILE}" \
             -DCMAKE_BUILD_TYPE=Release \
             -DPLATFORM=rpi \
-            -DHYPERION_LIGHT=ON \
+            -DENABLE_REMOTE_CTL=ON \
             -DENABLE_QT=OFF \
             -DENABLE_AUDIO=OFF \
             -DENABLE_EFFECTENGINE=ON \
