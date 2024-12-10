@@ -120,7 +120,6 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE="${TOOLCHAIN_FILE}" \
             -DCMAKE_BUILD_TYPE=Release \
             -DPLATFORM=rpi \
-            -DHYPERION_LIGHT=ON \
             -DENABLE_QT=OFF \
             -DENABLE_AUDIO=OFF \
             -DENABLE_EFFECTENGINE=ON \
