@@ -99,7 +99,7 @@ jobs:
             -DENABLE_DEV_TINKERFORGE=OFF \
             -DENABLE_DEV_USB_HID=OFF \
             -DENABLE_EFFECTENGINE=OFF \
-            -DENABLE_REMOTE_CTL=OFF \
+            -DENABLE_REMOTE_CTL=ON \
             -DENABLE_QT=OFF \
             -DENABLE_FORWARDER=OFF \
             -DENABLE_DEV_SPI=OFF \
@@ -121,7 +121,6 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE="${TOOLCHAIN_FILE}" \
             -DCMAKE_BUILD_TYPE=Release \
             -DPLATFORM=rpi \
-            -DENABLE_REMOTE_CTL=ON \
             -DENABLE_QT=OFF \
             -DENABLE_AUDIO=OFF \
             -DENABLE_EFFECTENGINE=ON \
