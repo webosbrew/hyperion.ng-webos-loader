@@ -99,6 +99,8 @@ jobs:
             -DENABLE_DEV_TINKERFORGE=OFF \
             -DENABLE_DEV_USB_HID=OFF \
             -DENABLE_EFFECTENGINE=OFF \
+            -DENABLE_REMOTE_CTL=OFF \
+            -DENABLE_REMOTE_CTL=ON \
             -DENABLE_QT=OFF \
             -DENABLE_FORWARDER=OFF \
             -DENABLE_DEV_SPI=OFF \
@@ -133,7 +135,6 @@ jobs:
             -DENABLE_BOBLIGHT_SERVER=ON \
             -DENABLE_FLATBUF_SERVER=ON \
             -DENABLE_PROTOBUF_SERVER=OFF \
-            -DENABLE_REMOTE_CTL=ON \
             -DENABLE_FORWARDER=ON \
             -DENABLE_FLATBUF_CONNECT=ON \
             -DIMPORT_FLATC="${GITHUB_WORKSPACE}/hyperion.ng/${BUILD_DIR_NATIVE}/flatc_export.cmake"
