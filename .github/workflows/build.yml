@@ -29,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: satgit62/hyperion.ng
+          repository: Lord-Grey/hyperion.ng
           ref: Refactor
           path: hyperion.ng
           submodules: recursive
