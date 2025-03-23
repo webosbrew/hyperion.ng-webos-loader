@@ -6,7 +6,7 @@ on:
   workflow_call:
 
 env:
-  TOOLCHAIN_URL: https://github.com/satgit62/buildroot-nc4/releases/download/webOS.0.1/arm-webos-linux-gnueabi_sdk-buildroot.tar.gz
+  TOOLCHAIN_URL: https://github.com/lord-grey/buildroot-nc4/releases/download/webOS.0.1/arm-webos-linux-gnueabi_sdk-buildroot.tar.gz
   TOOLCHAIN_DIR: /opt/arm-webos-linux-gnueabi_sdk-buildroot
   TOOLCHAIN_ENV_FILE: /opt/arm-webos-linux-gnueabi_sdk-buildroot/environment-setup
   TOOLCHAIN_FILE: /opt/arm-webos-linux-gnueabi_sdk-buildroot/share/buildroot/toolchainfile.cmake
@@ -125,8 +125,8 @@ jobs:
             -DENABLE_REMOTE_CTL=ON \
             -DENABLE_QT=OFF \
             -DENABLE_AUDIO=OFF \
-            -DENABLE_EFFECTENGINE=ON \
-            -DENABLE_JSONCHECKS=ON \
+            -DENABLE_EFFECTENGINE=OFF \
+            -DENABLE_JSONCHECKS=OFF \
             -DENABLE_DEV_SERIAL=ON \
             -DENABLE_DEV_USB_HID=ON \
             -DENABLE_DEV_WS281XPWM=OFF \
