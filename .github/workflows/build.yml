@@ -29,8 +29,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: satgit62/hyperion.ng
-          ref: Refactor
+          repository: hyperion-project/hyperion.ng
+          ref: 2.0.16
           path: hyperion.ng
           submodules: recursive
           fetch-depth: 0
