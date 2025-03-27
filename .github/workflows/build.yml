@@ -6,9 +6,7 @@ on:
   workflow_call:
 
 env:
-  TOOLCHAIN_URL: https://github.com/openlgtv/buildroot-nc4/releases/download/webos-b17b4cc/arm-webos-linux-gnueabi_sdk-buildroot.tar.gz
-
-
+  TOOLCHAIN_URL: https://github.com/Lord-Grey/buildroot-nc4/releases/download/webOS.0.1/arm-webos-linux-gnueabi_sdk-buildroot.tar.gz
   TOOLCHAIN_DIR: /opt/arm-webos-linux-gnueabi_sdk-buildroot
   TOOLCHAIN_ENV_FILE: /opt/arm-webos-linux-gnueabi_sdk-buildroot/environment-setup
   TOOLCHAIN_FILE: /opt/arm-webos-linux-gnueabi_sdk-buildroot/share/buildroot/toolchainfile.cmake
@@ -31,8 +29,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: hyperion-project/hyperion.ng
-          ref: d16142d28e88bb7d4a8a788c15317cbbb819af67
+          repository: satgit62/hyperion.ng
+          ref: satgit62/hyperion.ng
           path: hyperion.ng
           submodules: recursive
           fetch-depth: 0
