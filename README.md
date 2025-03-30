@@ -1,4 +1,4 @@
-# Hyperion.NG for webOS Version	2.0.17-beta.2
+# Hyperion.NG for webOS Version	2.0.17-beta.3
 
 Adjusts the corlor temperature added by @Lord-Grey
 
