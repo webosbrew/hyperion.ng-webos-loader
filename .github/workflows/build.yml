@@ -71,25 +71,44 @@ jobs:
 
       - name: Install native dependencies
         env:
-          apt_deps: ccache git cmake ninja-build build-essential libudev-dev qtbase5-dev libqt5serialport5-dev libqt5websockets5-dev libqt5sql5-sqlite libqt5svg5-dev libqt5x11extras5-dev libftdi1-dev python3-dev libxcb-image0-dev libxcb-util0-dev libxcb-shm0-dev libxcb-render0-dev libxcb-randr0-dev libxrandr-dev libxrender-dev libturbojpeg0-dev libssl-dev libmbedtls-dev
+          apt_deps: ccache git cmake build-essential libudev-dev qtbase5-dev libqt5serialport5-dev libqt5websockets5-dev libqt5sql5-sqlite libqt5svg5-dev libqt5x11extras5-dev libftdi1-dev python3-dev libxcb-image0-dev libxcb-util0-dev libxcb-shm0-dev libxcb-render0-dev libxcb-randr0-dev libxrandr-dev libxrender-dev libturbojpeg0-dev libssl-dev libmbedtls-dev
         run: |
           sudo apt update
           sudo apt install -y ${{ env.apt_deps }}
 
-      # - name: Build native flatbuffer compiler
-      #   env:
-      #     CCACHE_DIR: ${{ github.workspace }}/${{ env.CCACHE_DIR_NATIVE }}
-      #   run: |
-      #     pushd -- "./${{ env.BUILD_DIR_NATIVE }}"
-      #     cmake .. \
-      #       -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-      #       -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-      #       -DCMAKE_BUILD_TYPE=Release \
-      #       -DHYPERION_LIGHT=ON \
-      #       -DENABLE_FLATBUF_SERVER=ON \
-      #       -G Ninja
-      #     cmake --build . --target flatc
-      #     popd
+      - name: Build native
+        env:
+          CCACHE_DIR: ${{ github.workspace }}/${{ env.CCACHE_DIR_NATIVE }}
+        run: |
+          pushd -- "./${{ env.BUILD_DIR_NATIVE }}"
+          cmake .. \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DENABLE_FLATBUF_SERVER=OFF \
+            -DENABLE_DISPMANX=OFF \
+            -DENABLE_FB=OFF \
+            -DENABLE_V4L2=OFF \
+            -DENABLE_X11=OFF \
+            -DENABLE_XCB=OFF \
+            -DENABLE_AUDIO=OFF \
+            -DENABLE_BOBLIGHT_SERVER=OFF \
+            -DENABLE_CEC=OFF \
+            -DENABLE_DEV_NETWORK=OFF \
+            -DENABLE_DEV_SERIAL=OFF \
+            -DENABLE_DEV_TINKERFORGE=OFF \
+            -DENABLE_DEV_USB_HID=OFF \
+            -DENABLE_EFFECTENGINE=OFF \
+            -DENABLE_REMOTE_CTL=OFF \
+            -DENABLE_QT=OFF \
+            -DENABLE_FORWARDER=OFF \
+            -DENABLE_DEV_SPI=OFF \
+            -DENABLE_MDNS=OFF \
+            -DENABLE_FLATBUF_CONNECT=ON \
+            -DENABLE_PROTOBUF_SERVER=OFF \
+            -Wno-dev
+          make
+          popd
 
       - name: Build cross (webos arm)
         env:
@@ -102,7 +121,7 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE="${TOOLCHAIN_FILE}" \
             -DCMAKE_BUILD_TYPE=Release \
             -DPLATFORM=rpi \
-            -DENABLE_DEV_FTDI=OFF \
+            -DENABLE_FTDIDEV=OFF \
             -DHYPERION_LIGHT=ON \
             -DENABLE_REMOTE_CTL=ON \
             -DENABLE_QT=OFF \
@@ -120,8 +139,8 @@ jobs:
             -DENABLE_PROTOBUF_SERVER=OFF \
             -DENABLE_FORWARDER=ON \
             -DENABLE_FLATBUF_CONNECT=ON \
-            -G Ninja
-          cmake --build .
+            -DIMPORT_FLATC="${GITHUB_WORKSPACE}/hyperion.ng/${BUILD_DIR_NATIVE}/flatc_export.cmake"
+          make
           popd
 
       - name: Copy built binaries to release/
