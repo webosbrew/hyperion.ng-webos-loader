@@ -116,6 +116,7 @@ jobs:
         run: |
           pushd -- "./${{ env.BUILD_DIR_CROSS }}"
           cmake .. \
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -DCMAKE_TOOLCHAIN_FILE="${TOOLCHAIN_FILE}" \
