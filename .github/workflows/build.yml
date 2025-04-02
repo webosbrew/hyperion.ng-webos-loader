@@ -129,7 +129,7 @@ jobs:
             -DENABLE_EFFECTENGINE=OFF \
             -DENABLE_JSONCHECKS=OFF \
             -DENABLE_DEV_SERIAL=ON \
-          # -DENABLE_DEV_USB_HID=ON \
+            -DENABLE_DEV_USB_HID=ON \
             -DENABLE_DEV_WS281XPWM=OFF \
             -DENABLE_DEV_TINKERFORGE=ON \
             -DENABLE_MDNS=ON \
