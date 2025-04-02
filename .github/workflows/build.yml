@@ -139,8 +139,8 @@ jobs:
             -DENABLE_PROTOBUF_SERVER=OFF \
             -DENABLE_FORWARDER=ON \
             -DENABLE_FLATBUF_CONNECT=ON \
-            -G Ninja
-          cmake --build .
+            -DIMPORT_FLATC="${GITHUB_WORKSPACE}/hyperion.ng/${BUILD_DIR_NATIVE}/flatc_export.cmake"
+          make
           popd
 
       - name: Copy built binaries to release/
