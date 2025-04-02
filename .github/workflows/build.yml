@@ -71,7 +71,7 @@ jobs:
 
       - name: Install native dependencies
         env:
-          apt_deps: ccache git cmake build-essential qtbase5-dev libqt5serialport5-dev libqt5websockets5-dev libqt5sql5-sqlite libqt5svg5-dev libqt5x11extras5-dev libftdi1-dev python3-dev libxcb-image0-dev libxcb-util0-dev libxcb-shm0-dev libxcb-render0-dev libxcb-randr0-dev libxrandr-dev libxrender-dev libturbojpeg0-dev libssl-dev libmbedtls-dev
+          apt_deps: ccache git cmake build-essential libudev-dev qtbase5-dev libqt5serialport5-dev libqt5websockets5-dev libqt5sql5-sqlite libqt5svg5-dev libqt5x11extras5-dev libftdi1-dev python3-dev libxcb-image0-dev libxcb-util0-dev libxcb-shm0-dev libxcb-render0-dev libxcb-randr0-dev libxrandr-dev libxrender-dev libturbojpeg0-dev libssl-dev libmbedtls-dev
         run: |
           sudo apt update
           sudo apt install -y ${{ env.apt_deps }}
@@ -121,6 +121,7 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE="${TOOLCHAIN_FILE}" \
             -DCMAKE_BUILD_TYPE=Release \
             -DPLATFORM=rpi \
+            -DENABLE_FTDIDEV=OFF \
             -DHYPERION_LIGHT=ON \
             -DENABLE_REMOTE_CTL=ON \
             -DENABLE_QT=OFF \
@@ -150,7 +151,8 @@ jobs:
 
       - name: Copy dependencies to release/
         env:
-          dependency_libs: libpython3.10.so.1.0 libpng16.so.16 libjpeg.so.8 libcrypto.so.1.1 libz.so.1 libssl.so.1.1 libpcre2-16.so.0 libQt5Gui.so.5 libQt5Network.so.5 libQt5Widgets.so.5 libk5crypto.so.3 libatomic.so.1 libQt5Core.so.5 libkrb5support.so.0 libcom_err.so.3 libstdc++.so.6 libkrb5.so.3 libQt5Sql.so.5 libgssapi_krb5.so.2 libQt5SerialPort.so.5 libQt5WebSockets.so.5 libusb-1.0.so.0 libudev.so.1
+          dependency_libs: libpython3.10.so.1.0 libpng16.so.16 libjpeg.so.8 libcrypto.so.1.1 libz.so.1 libssl.so.1.1 libpcre2-16.so.0 libQt5Gui.so.5 libQt5Network.so.5 libQt5Widgets.so.5 libk5crypto.so.3 libatomic.so.1 libQt5Core.so.5 libkrb5support.so.0 libcom_err.so.3 libstdc++.so.6 libkrb5.so.3 libQt5Sql.so.5 libgssapi_krb5.so.2 libQt5SerialPort.so.5 libQt5WebSockets.so.5 libusb-1.0.so.0 libftdi1.so.2 libudev.so.1
+
         run: |
           for i in ${{ env.dependency_libs }}; do find -- "${TOOLCHAIN_DIR}/arm-webos-linux-gnueabi/sysroot/" -name "${i}" -exec cp -t ./release -- {} \;; done
           mkdir -p ./release/sqldrivers
