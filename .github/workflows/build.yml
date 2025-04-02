@@ -97,7 +97,7 @@ jobs:
             -DENABLE_DEV_NETWORK=OFF \
             -DENABLE_DEV_SERIAL=OFF \
             -DENABLE_DEV_TINKERFORGE=OFF \
-            -DENABLE_DEV_USB_HID=OFF \
+          # -DENABLE_DEV_USB_HID=OFF \
             -DENABLE_EFFECTENGINE=OFF \
             -DENABLE_REMOTE_CTL=OFF \
             -DENABLE_QT=OFF \
