@@ -140,7 +140,6 @@ jobs:
             -DENABLE_FORWARDER=ON \
             -DENABLE_FLATBUF_CONNECT=ON \
             -DIMPORT_FLATC="${GITHUB_WORKSPACE}/hyperion.ng/${BUILD_DIR_NATIVE}/flatc_export.cmake"
-            -Wno-dev
           make
           popd
 
