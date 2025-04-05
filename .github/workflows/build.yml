@@ -10,11 +10,9 @@ env:
   TOOLCHAIN_DIR: /opt/arm-webos-linux-gnueabi_sdk-buildroot
   TOOLCHAIN_ENV_FILE: /opt/arm-webos-linux-gnueabi_sdk-buildroot/environment-setup
   TOOLCHAIN_FILE: /opt/arm-webos-linux-gnueabi_sdk-buildroot/share/buildroot/toolchainfile.cmake
-  BUILD_DIR_NATIVE: build-x86x64
-  BUILD_DIR_CROSS: build-cross
+  BUILD_DIR: build
 
-  CCACHE_DIR_NATIVE: .ccache-build-x86x64
-  CCACHE_DIR_CROSS: .ccache-build-cross
+  CCACHE_DIR: .ccache-build
   CCACHE_COMPRESS: true
   CCACHE_COMPRESSLEVEL: 6
   CCACHE_MAXSIZE: 600M
@@ -29,8 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: satgit62/hyperion.ng
-          ref: Refactor
+          repository: hyperion-project/hyperion.ng
           path: hyperion.ng
           submodules: recursive
           fetch-depth: 0
@@ -38,18 +35,9 @@ jobs:
       - name: Restore/Cache build directories
         uses: actions/cache@v4
         with:
-          path: |
-            ${{ github.workspace }}/${{ env.CCACHE_DIR_NATIVE }}
-            ${{ github.workspace }}/${{ env.CCACHE_DIR_CROSS }}
-
+          path: ${{ github.workspace }}/${{ env.CCACHE_DIR }}
           key: ccache-${{ runner.os }}-${{github.run_id}}
-          restore-keys: |
-            ccache-${{ runner.os }}
-
-      - name: Create build directories
-        run: |
-          mkdir -p -- "./${{ env.BUILD_DIR_NATIVE }}"
-          mkdir -p -- "./${{ env.BUILD_DIR_CROSS }}"
+          restore-keys: ccache-${{ runner.os }}
 
       - name: Cache toolchain dir
         id: cache-toolchain
@@ -76,52 +64,19 @@ jobs:
           sudo apt update
           sudo apt install -y ${{ env.apt_deps }}
 
-      - name: Build native
+      - name: Build
         env:
-          CCACHE_DIR: ${{ github.workspace }}/${{ env.CCACHE_DIR_NATIVE }}
+          CCACHE_DIR: ${{ github.workspace }}/${{ env.CCACHE_DIR }}
         run: |
-          pushd -- "./${{ env.BUILD_DIR_NATIVE }}"
-          cmake .. \
-            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DENABLE_FLATBUF_SERVER=OFF \
-            -DENABLE_DISPMANX=OFF \
-            -DENABLE_FB=OFF \
-            -DENABLE_V4L2=OFF \
-            -DENABLE_X11=OFF \
-            -DENABLE_XCB=OFF \
-            -DENABLE_AUDIO=OFF \
-            -DENABLE_BOBLIGHT_SERVER=OFF \
-            -DENABLE_CEC=OFF \
-            -DENABLE_DEV_NETWORK=OFF \
-            -DENABLE_DEV_SERIAL=OFF \
-            -DENABLE_DEV_TINKERFORGE=OFF \
-            -DENABLE_DEV_USB_HID=OFF \
-            -DENABLE_EFFECTENGINE=OFF \
-            -DENABLE_REMOTE_CTL=OFF \
-            -DENABLE_QT=OFF \
-            -DENABLE_FORWARDER=OFF \
-            -DENABLE_DEV_SPI=OFF \
-            -DENABLE_MDNS=OFF \
-            -DENABLE_FLATBUF_CONNECT=ON \
-            -DENABLE_PROTOBUF_SERVER=OFF \
-            -Wno-dev
-          make
-          popd
-
-      - name: Build cross (webos arm)
-        env:
-          CCACHE_DIR: ${{ github.workspace }}/${{ env.CCACHE_DIR_CROSS }}
-        run: |
-          pushd -- "./${{ env.BUILD_DIR_CROSS }}"
+          mkdir -p -- "./${{ env.BUILD_DIR }}"
+          pushd -- "./${{ env.BUILD_DIR }}"
           cmake .. \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -DCMAKE_TOOLCHAIN_FILE="${TOOLCHAIN_FILE}" \
             -DCMAKE_BUILD_TYPE=Release \
             -DPLATFORM=rpi \
-            -DENABLE_FTDIDEV=OFF \
+            -DENABLE_DEV_FTDI=OFF \
             -DHYPERION_LIGHT=ON \
             -DENABLE_REMOTE_CTL=ON \
             -DENABLE_QT=OFF \
@@ -139,14 +94,14 @@ jobs:
             -DENABLE_PROTOBUF_SERVER=OFF \
             -DENABLE_FORWARDER=ON \
             -DENABLE_FLATBUF_CONNECT=ON \
-            -DIMPORT_FLATC="${GITHUB_WORKSPACE}/hyperion.ng/${BUILD_DIR_NATIVE}/flatc_export.cmake"
-          make
+            -G Ninja
+          cmake --build .
           popd
 
       - name: Copy built binaries to release/
         run: |
           rm -rf ./release
-          cp -r -T -- "./${{ env.BUILD_DIR_CROSS }}/bin" ./release
+          cp -r -T -- "./${{ env.BUILD_DIR }}/bin" ./release
           find ./release
 
       - name: Copy dependencies to release/
