@@ -27,7 +27,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: hyperion-project/hyperion.ng
+          repository: satgit62/hyperion.ng
+          ref: Refactor
           path: hyperion.ng
           submodules: recursive
           fetch-depth: 0
@@ -76,7 +77,7 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE="${TOOLCHAIN_FILE}" \
             -DCMAKE_BUILD_TYPE=Release \
             -DPLATFORM=rpi \
-            -DENABLE_DEV_FTDI=OFF \
+            -DENABLE_DEV_FTDI=ON \
             -DHYPERION_LIGHT=ON \
             -DENABLE_REMOTE_CTL=ON \
             -DENABLE_QT=OFF \
