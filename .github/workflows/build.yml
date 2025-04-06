@@ -82,7 +82,7 @@ jobs:
             -DENABLE_REMOTE_CTL=ON \
             -DENABLE_QT=OFF \
             -DENABLE_AUDIO=OFF \
-            -DENABLE_EFFECTENGINE=OFF \
+            -DENABLE_EFFECTENGINE=ON \
             -DENABLE_JSONCHECKS=OFF \
             -DENABLE_DEV_SERIAL=ON \
             -DENABLE_DEV_USB_HID=ON \
