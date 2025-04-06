@@ -75,7 +75,7 @@ jobs:
             -DPython3_EXECUTABLE="${TOOLCHAIN_DIR}/bin/python3" \
             -DCMAKE_BUILD_TYPE=Release \
             -DPLATFORM=rpi \
-            -DENABLE_DEV_FTDI=OFF \
+            -DENABLE_DEV_FTDI=ON \
             -DHYPERION_LIGHT=ON \
             -DENABLE_REMOTE_CTL=ON \
             -DENABLE_QT=OFF \
