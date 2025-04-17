@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: Lord-Grey/hyperion.ng
-          ref: flatbuffer
+          ref: Migration
           path: hyperion.ng
           submodules: recursive
           fetch-depth: 0
