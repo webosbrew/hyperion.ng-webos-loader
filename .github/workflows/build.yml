@@ -144,9 +144,10 @@ jobs:
         run: ls -R
 
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
-          node-version: 14.x
+          node-version: lts/*
+          cache: npm
 
       - name: Restore toolchain cache
         id: cache-toolchain
@@ -172,16 +173,16 @@ jobs:
       - run: npm run build -- --env production
       - name: Build service
         run: |
-          mkdir -p ./dist/service
-          rm -rf ./dist/service/*
           mkdir -p ./service/build
-          pushd service/build
+          pushd ./service/build
           cmake .. \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_FILE}
+            -DCMAKE_TOOLCHAIN_FILE="${TOOLCHAIN_FILE}"
           make
           popd
-          cp -r ./service/build/dist/* ./dist/service/
+          mkdir -p ./dist
+          rm -rf ./dist/service
+          cp -r -T -- ./service/build/dist ./dist/service
 
       - name: Copy hyperion.ng into dist/service/hyperion
         run: |
