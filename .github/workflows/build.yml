@@ -172,16 +172,16 @@ jobs:
       - run: npm run build -- --env production
       - name: Build service
         run: |
+          mkdir -p ./dist/service
+          rm -rf ./dist/service/*
           mkdir -p ./service/build
-          pushd ./service/build
+          pushd service/build
           cmake .. \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_TOOLCHAIN_FILE="${TOOLCHAIN_FILE}"
+            -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_FILE}
           make
           popd
-          mkdir -p ./dist
-          rm -rf ./dist/service
-          cp -r -T -- ./service/build/dist ./dist/service
+          cp -r ./service/build/dist/* ./dist/service/
 
       - name: Copy hyperion.ng into dist/service/hyperion
         run: |
