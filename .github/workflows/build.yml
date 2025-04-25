@@ -144,10 +144,9 @@ jobs:
         run: ls -R
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v1
         with:
           node-version: 14.x
-          cache: npm
 
       - name: Restore toolchain cache
         id: cache-toolchain
