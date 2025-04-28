@@ -168,7 +168,7 @@ jobs:
           git config --global url."https://github.com/".insteadOf
           ssh://git@github.com/
 
-      - run: npm ci
+      - run: npm install
       - run: npm run lint
       - run: npm run build -- --env production
       - name: Build service
