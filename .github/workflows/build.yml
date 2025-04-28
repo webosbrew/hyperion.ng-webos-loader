@@ -146,8 +146,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: lts/*
-          cache: npm
+          node-version: 14.x
 
       - name: Restore toolchain cache
         id: cache-toolchain
