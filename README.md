@@ -1,4 +1,4 @@
-Hyperion.NG for webOS
+# Hyperion.NG for webOS
 
 Binaries are [available](https://repo.webosbrew.org/apps/org.webosbrew.hyperion.ng.loader) through [Homebrew Channel](https://github.com/webosbrew/webos-homebrew-channel).
 
@@ -7,7 +7,7 @@ Binaries are [available](https://repo.webosbrew.org/apps/org.webosbrew.hyperion.
 ### Requirements
 
 * Linux host system
-* [buildroot-nc4](https://github.com/openlgtv/buildroot-nc4/releases), a toolchain targeting webOS
+* [buildroot-nc4](https://github.com/openlgtv/buildroot-nc4/releases), a toolchain targeting webOS 
 * Git
 * CMake
 * npm
