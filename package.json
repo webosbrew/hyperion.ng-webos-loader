@@ -1,6 +1,6 @@
 {
   "name": "org.webosbrew.hyperion.ng.loader",
-  "version": "0.1.11",
+  "version": "0.2.0",
   "description": "Hyperion.NG loader",
   "main": "frontend/index.js",
   "moduledir": "frontend",
