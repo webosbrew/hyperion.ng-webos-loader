@@ -27,8 +27,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: hyperion-project/hyperion.ng
-          ref: master
+          repository: Lord-Grey/hyperion.ng
+          ref: 2.1.2-beta.1
           path: hyperion.ng
           submodules: recursive
           fetch-depth: 0
