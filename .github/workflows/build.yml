@@ -1,134 +1,121 @@
-name: WebOS build
+name: WebOS-Build (Qt6)
 on:
   push:
   pull_request:
   workflow_dispatch:
-  workflow_call:
 
 env:
   TOOLCHAIN_URL: https://github.com/openlgtv/buildroot-nc4/releases/download/webos-d7ed7ee/arm-webos-linux-gnueabi_sdk-buildroot.tar.gz
   TOOLCHAIN_DIR: /opt/arm-webos-linux-gnueabi_sdk-buildroot
-  TOOLCHAIN_ENV_FILE: /opt/arm-webos-linux-gnueabi_sdk-buildroot/environment-setup
   TOOLCHAIN_FILE: /opt/arm-webos-linux-gnueabi_sdk-buildroot/share/buildroot/toolchainfile.cmake
-  BUILD_DIR_NATIVE: build-x86x64
-  BUILD_DIR_CROSS: build-cross
-
-  CCACHE_DIR_NATIVE: .ccache-build-x86x64
-  CCACHE_DIR_CROSS: .ccache-build-cross
-  CCACHE_COMPRESS: true
-  CCACHE_COMPRESSLEVEL: 6
-  CCACHE_MAXSIZE: 600M
+  BUILD_DIR: build
+  QT_VERSION: "6.8.3"
 
 jobs:
   build_hyperion_ng:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./hyperion.ng
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout hyperion.ng
+        uses: actions/checkout@v4
         with:
           repository: hyperion-project/hyperion.ng
-          ref: 2.0.16
+          ref: 2.2.1
           path: hyperion.ng
           submodules: recursive
-          fetch-depth: 0
 
-      - name: Restore/Cache build directories
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{ github.workspace }}/${{ env.CCACHE_DIR_NATIVE }}
-            ${{ github.workspace }}/${{ env.CCACHE_DIR_CROSS }}
-
-          key: ccache-${{ runner.os }}-${{github.run_id}}
-          restore-keys: |
-            ccache-${{ runner.os }}
-
-      - name: Create build directories
+      - name: Install native dependencies
         run: |
-          mkdir -p -- "./${{ env.BUILD_DIR_NATIVE }}"
-          mkdir -p -- "./${{ env.BUILD_DIR_CROSS }}"
-
-      - name: Cache toolchain dir
+          sudo apt update
+          sudo apt install -y ccache git cmake build-essential flatbuffers-compiler ninja-build wget libdbus-1-dev
+      - name: Set up Environment
+        run: |        
+          echo "QT_TOOLCHAIN_DIR=${{ env.TOOLCHAIN_DIR }}/qt6-host" >> $GITHUB_ENV
+          echo "SYSROOT=${{ env.TOOLCHAIN_DIR }}/arm-webos-linux-gnueabi/sysroot" >> $GITHUB_ENV
+      - name: Cache toolchain
         id: cache-toolchain
         uses: actions/cache@v4
         with:
           path: ${{ env.TOOLCHAIN_DIR }}
-          key: ${{ runner.os }}-${{ env.TOOLCHAIN_URL }}
+          key: ${{ runner.os }}-toolchain-qt-${{ env.QT_VERSION }}
 
-      - name: Download and unpack toolchain
+      - name: Download and unpack toolchain      
         if: steps.cache-toolchain.outputs.cache-hit != 'true'
-        working-directory: /opt
         run: |
-          wget -q -O toolchain.tar.gz -- "${TOOLCHAIN_URL}"
-          tar xf toolchain.tar.gz
-          pushd -- "${TOOLCHAIN_DIR}"
+          sudo mkdir -p /opt
+          sudo chown $USER /opt
+          wget -q -O toolchain.tar.gz ${{ env.TOOLCHAIN_URL }}
+          tar xf toolchain.tar.gz -C /opt
+          cd ${{ env.TOOLCHAIN_DIR }}
           ./relocate-sdk.sh
-          popd
-          find -- "${TOOLCHAIN_DIR}/bin" -type f -iname 'perl*' -delete
-
-      - name: Install native dependencies
-        env:
-          apt_deps: ccache git cmake build-essential qtbase5-dev libqt5serialport5-dev libqt5sql5-sqlite libqt5svg5-dev libqt5x11extras5-dev python3-dev libxcb-image0-dev libxcb-util0-dev libxcb-shm0-dev libxcb-render0-dev libxcb-randr0-dev libxrandr-dev libxrender-dev libturbojpeg0-dev libssl-dev libmbedtls-dev
+      - name: "Build QT6 (Host & Cross)"
+        if: steps.cache-toolchain.outputs.cache-hit != 'true'
         run: |
-          sudo apt update
-          sudo apt install -y ${{ env.apt_deps }}
-
-      - name: Build native
+          sudo mkdir -p /opt/qt_build ${{ env.QT_TOOLCHAIN_DIR }}
+          sudo chown -R $USER:$USER /opt/qt_build ${{ env.QT_TOOLCHAIN_DIR }}
+          git clone --branch v${QT_VERSION} --depth 1 https://github.com/qt/qtbase.git /opt/qt_build/qt_source
+          
+          # 1. Host Build
+          mkdir -p /opt/qt_build/host && cd /opt/qt_build/host
+          cmake /opt/qt_build/qt_source -DCMAKE_INSTALL_PREFIX=${{ env.QT_TOOLCHAIN_DIR }} -DCMAKE_BUILD_TYPE=Release -DQT_FEATURE_gui=OFF -DQT_FEATURE_opengl=OFF -DQT_FEATURE_dbus=ON -DQT_BUILD_TESTS=OFF -DFEATURE_icu=OFF -DQT_BUILD_EXAMPLES=OFF -GNinja
+          ninja install
+          # 2. Preparation & Patches
+          cd /opt/qt_build/qt_source
+          mkdir -p mkspecs/devices/linux-webos-g++
+          cp -r ${{ env.TOOLCHAIN_DIR }}/mkspecs/devices/linux-buildroot-g++ mkspecs/devices/linux-webos-g++
+          sed -i '1i#define EM_AARCH64 183' src/corelib/plugin/qelfparser_p.cpp
+          sed -i 's/readOnly = (statfs_buf.f_flags \& ST_RDONLY) != 0;/readOnly = false;/' src/corelib/io/qstorageinfo_linux.cpp
+                    
+          # 3. Cross Build
+          mkdir -p /opt/qt_build/base_cross && cd /opt/qt_build/base_cross
+          cmake /opt/qt_build/qt_source -DCMAKE_TOOLCHAIN_FILE=${{ env.TOOLCHAIN_FILE }} -DQT_HOST_PATH=${{ env.QT_TOOLCHAIN_DIR }} -DCMAKE_INSTALL_PREFIX=/usr/local/qt6 -DCMAKE_STAGING_PREFIX=${{ env.SYSROOT }}/usr/local/qt6 -DCMAKE_BUILD_TYPE=Release -DQT_FEATURE_dbus=ON -DQT_FEATURE_gui=ON -DQT_FEATURE_widgets=ON -DQT_FEATURE_opengl=OFF -DFEATURE_icu=OFF -GNinja -DQt6CoreTools_DIR=${{ env.QT_TOOLCHAIN_DIR }}/lib/cmake/Qt6CoreTools -DQt6DBusTools_DIR=${{ env.QT_TOOLCHAIN_DIR }}/lib/cmake/Qt6DBusTools -DQt6WidgetsTools_DIR=${{ env.QT_TOOLCHAIN_DIR }}/lib/cmake/Qt6WidgetsTools -DQt6GuiTools_DIR=${{ env.QT_TOOLCHAIN_DIR }}/lib/cmake/Qt6GuiTools
+          ninja install
+          # --- 4. ADD-ON MODULES ---
+          for mod in qtserialport qtwebsockets qtimageformats; do
+            echo "Building module: $mod"
+            
+            # CORRECTION: Use the /qt/ path and the important $ sign before {mod}
+            git clone --branch "v${QT_VERSION}" --depth 1 "https://github.com/qt/${mod}.git" "/opt/qt_build/${mod}"
+            
+            mkdir -p "/opt/qt_build/${mod}/build" && cd "/opt/qt_build/${mod}/build"
+            
+            cmake .. \
+              -DCMAKE_TOOLCHAIN_FILE="${{ env.TOOLCHAIN_FILE }}" \
+              -DQT_HOST_PATH="${{ env.QT_TOOLCHAIN_DIR }}" \
+              -DCMAKE_PREFIX_PATH="${{ env.SYSROOT }}/usr/local/qt6" \
+              -DCMAKE_INSTALL_PREFIX="/usr/local/qt6" \
+              -DCMAKE_STAGING_PREFIX="${{ env.SYSROOT }}/usr/local/qt6" \
+              -DINPUT_openssl=runtime \
+              -DQT_FEATURE_ssl=ON \
+              -GNinja
+            ninja install
+          done
+      - name: Build Hyperion
         env:
-          CCACHE_DIR: ${{ github.workspace }}/${{ env.CCACHE_DIR_NATIVE }}
+          CCACHE_DIR: ${{ github.workspace }}/${{ env.CCACHE_DIR }}
         run: |
-          pushd -- "./${{ env.BUILD_DIR_NATIVE }}"
+          # Change to the directory where Hyperion was cloned
+          cd hyperion.ng
+          mkdir -p "${{ env.BUILD_DIR }}"
+          cd "${{ env.BUILD_DIR }}"
+          
           cmake .. \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DENABLE_FLATBUF_SERVER=OFF \
-            -DENABLE_DISPMANX=OFF \
-            -DENABLE_FB=OFF \
-            -DENABLE_V4L2=OFF \
-            -DENABLE_X11=OFF \
-            -DENABLE_XCB=OFF \
-            -DENABLE_AUDIO=OFF \
-            -DENABLE_BOBLIGHT_SERVER=OFF \
-            -DENABLE_CEC=OFF \
-            -DENABLE_DEV_NETWORK=OFF \
-            -DENABLE_DEV_SERIAL=OFF \
-            -DENABLE_DEV_TINKERFORGE=OFF \
-            -DENABLE_DEV_USB_HID=OFF \
-            -DENABLE_EFFECTENGINE=OFF \
-            -DENABLE_REMOTE_CTL=OFF \
-            -DENABLE_QT=OFF \
-            -DENABLE_FORWARDER=OFF \
-            -DENABLE_DEV_SPI=OFF \
-            -DENABLE_MDNS=OFF \
-            -DENABLE_FLATBUF_CONNECT=ON \
-            -DENABLE_PROTOBUF_SERVER=OFF \
-            -Wno-dev
-          make
-          popd
-
-      - name: Build cross (webos arm)
-        env:
-          CCACHE_DIR: ${{ github.workspace }}/${{ env.CCACHE_DIR_CROSS }}
-        run: |
-          pushd -- "./${{ env.BUILD_DIR_CROSS }}"
-          cmake .. \
-            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_TOOLCHAIN_FILE="${TOOLCHAIN_FILE}" \
+            -DCMAKE_TOOLCHAIN_FILE="${{ env.TOOLCHAIN_FILE }}" \
+            -DQT_HOST_PATH="${{ env.QT_TOOLCHAIN_DIR }}" \
+            -DCMAKE_PREFIX_PATH="${{ env.SYSROOT }}/usr/local/qt6" \
+            -DPython3_EXECUTABLE="${{ env.TOOLCHAIN_DIR }}/bin/python3" \
             -DCMAKE_BUILD_TYPE=Release \
             -DPLATFORM=rpi \
+            -DENABLE_CEC=OFF \
+            -DENABLE_DEV_FTDI=ON \
             -DHYPERION_LIGHT=ON \
-            -DENABLE_QT=OFF \
+            -DENABLE_REMOTE_CTL=ON \
             -DENABLE_AUDIO=OFF \
             -DENABLE_EFFECTENGINE=ON \
             -DENABLE_JSONCHECKS=ON \
             -DENABLE_DEV_SERIAL=ON \
             -DENABLE_DEV_USB_HID=ON \
-            -DENABLE_DEV_WS281XPWM=OFF \
             -DENABLE_DEV_TINKERFORGE=ON \
             -DENABLE_MDNS=ON \
             -DENABLE_DEPLOY_DEPENDENCIES=OFF \
@@ -137,121 +124,110 @@ jobs:
             -DENABLE_PROTOBUF_SERVER=OFF \
             -DENABLE_FORWARDER=ON \
             -DENABLE_FLATBUF_CONNECT=ON \
-            -DIMPORT_FLATC="${GITHUB_WORKSPACE}/hyperion.ng/${BUILD_DIR_NATIVE}/flatc_export.cmake"
-          make
-          popd
-
-      - name: Copy built binaries to release/
+            -G Ninja
+          ninja
+      - name: Copy built binaries and dependencies to release/
+        env:
+          dependency_libs: >-
+            libpython3.10.so.1.0 libpng16.so.16 libjpeg.so.8 libcrypt.so.1 libcrypto.so.1.1 libbz2.so.1
+            libz.so.1 libssl.so.1.1 libpcre2-16.so.0 libusb-1.0.so.0 libftdi1.so.2 libudev.so.1 libxkbcommon.so.0
+            libfontconfig.so.1 libglib-2.0.so.0 libfreetype.so.6 libz.so.1 libgthread-2.0.so.0 libgcc_s.so.1
+          gcc_runtime_libs: >-
+            libstdc++.so.6 libatomic.so.1
+          qt6_libs: >-
+            libQt6Gui.so.6 libQt6Network.so.6 libQt6Widgets.so.6 libQt6Core.so.6 libQt6Sql.so.6 libQt6SerialPort.so.6 libQt6WebSockets.so.6 libQt6DBus.so.6
+            
         run: |
           rm -rf ./release
-          cp -r -T -- "./${{ env.BUILD_DIR_CROSS }}/bin" ./release
-          find ./release
-
-      - name: Copy dependencies to release/
-        env:
-          dependency_libs: libpython3.10.so.1.0 libpng16.so.16 libjpeg.so.8 libcrypto.so.1.1 libz.so.1 libssl.so.1.1 libpcre2-16.so.0 libQt5Gui.so.5 libQt5Network.so.5 libQt5Widgets.so.5 libk5crypto.so.3 libatomic.so.1 libQt5Core.so.5 libkrb5support.so.0 libcom_err.so.3 libstdc++.so.6 libkrb5.so.3 libQt5Sql.so.5 libgssapi_krb5.so.2 libQt5SerialPort.so.5 libusb-1.0.so.0 libudev.so.1
-        run: |
-          for i in ${{ env.dependency_libs }}; do find -- "${TOOLCHAIN_DIR}/arm-webos-linux-gnueabi/sysroot/" -name "${i}" -exec cp -t ./release -- {} \;; done
+          # Erstelle alle notwendigen Ordnerstrukturen
+          mkdir -p ./release/python/lib/python3.10
           mkdir -p ./release/sqldrivers
           mkdir -p ./release/imageformats
-          mkdir -p ./release/python/lib
-          cp -t ./release/sqldrivers -- "${TOOLCHAIN_DIR}/arm-webos-linux-gnueabi/sysroot/usr/lib/qt/plugins/sqldrivers/libqsqlite.so"
-          cp -t ./release/imageformats -- "${TOOLCHAIN_DIR}/arm-webos-linux-gnueabi/sysroot/usr/lib/qt/plugins/imageformats/libqico.so"
-          cp -t ./release/imageformats -- "${TOOLCHAIN_DIR}/arm-webos-linux-gnueabi/sysroot/usr/lib/qt/plugins/imageformats/libqjpeg.so"
-          cp -r -t ./release/python/lib -- "${TOOLCHAIN_DIR}/arm-webos-linux-gnueabi/sysroot/usr/lib/python3.10"
-          find ./release
-
-      - name: Upload artifacts
+          mkdir -p ./release/tls
+          
+          # 1. Copy Hyperion Binaries
+          cp -r -T -- "./hyperion.ng/${{ env.BUILD_DIR }}/bin" ./release
+          
+          # 2. Collect libraries from Sysroot/Toolchain
+          for i in ${{ env.dependency_libs }}; do
+            find "${{ env.SYSROOT }}/usr/lib/" "${{ env.SYSROOT }}/lib/" -name "${i}" -exec cp -L {} ./release/ \; 2>/dev/null | head -1
+          done
+          for i in ${{ env.gcc_runtime_libs }}; do
+            find "${{ env.TOOLCHAIN_DIR }}/arm-webos-linux-gnueabi/lib/" -name "${i}" -exec cp -L {} ./release/ \; 2>/dev/null | head -1
+          done
+          for i in ${{ env.qt6_libs }}; do
+            find "${{ env.SYSROOT }}/usr/local/qt6/lib/" -name "${i}" -exec cp -L {} ./release/ \; 2>/dev/null | head -1
+          done
+          # 3. Copy Qt6 Plugins (IMPORTANT!)
+          echo "Copying Qt6 Plugins..."
+          cp -L "${{ env.SYSROOT }}/usr/local/qt6/plugins/sqldrivers/"*.so ./release/sqldrivers/ 2>/dev/null || true
+          cp -L "${{ env.SYSROOT }}/usr/local/qt6/plugins/imageformats/"*.so ./release/imageformats/ 2>/dev/null || true
+          cp -L "${{ env.SYSROOT }}/usr/local/qt6/plugins/tls/"*.so ./release/tls/ 2>/dev/null || true
+          # 4. Python Standard Library Struktur kopieren
+          echo "Copying Python Libs..."
+          cp -r "${{ env.SYSROOT }}/usr/lib/python3.10/"* ./release/python/lib/python3.10/
+          # 5. Stripping - Space savings (approx. 70%)
+          echo "Stripping binaries..."
+          STRIP="${{ env.TOOLCHAIN_DIR }}/bin/arm-webos-linux-gnueabi-strip"
+          $STRIP ./release/hyperiond || true
+          find ./release -maxdepth 1 -name "*.so*" -exec $STRIP --strip-unneeded {} + || true
+          find ./release/python/lib/python3.10/lib-dynload -name "*.so" -exec $STRIP --strip-unneeded {} + || true
+          find ./release/sqldrivers -name "*.so" -exec $STRIP --strip-unneeded {} + || true
+          find ./release/imageformats -name "*.so" -exec $STRIP --strip-unneeded {} + || true
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: hyperion.ng-build
-          path: ${{ github.workspace }}/hyperion.ng/release/*
-          if-no-files-found: error
+          name: hyperion.ng-webos-binaries
+          path: ./release/
+
 
   build_ipk:
     runs-on: ubuntu-latest
     needs: build_hyperion_ng
-
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-
       - uses: actions/download-artifact@v4
         with:
-          name: hyperion.ng-build
+          name: hyperion.ng-webos-binaries
           path: hyperion.ng-build
-
-      - name: Display structure of downloaded files
-        run: ls -R
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: lts/*
-          cache: npm
-
+          node-version: 14.x
       - name: Restore toolchain cache
-        id: cache-toolchain
         uses: actions/cache@v4
         with:
           path: ${{ env.TOOLCHAIN_DIR }}
-          key: ${{ runner.os }}-${{ env.TOOLCHAIN_URL }}
-
+          key: ${{ runner.os }}-toolchain-qt-${{ env.QT_VERSION }}
       - name: Install native dependencies
-        env:
-          apt_deps: cmake build-essential
-        run: |
-          sudo apt update
-          sudo apt install -y ${{ env.apt_deps }}
-
-      - name: Reconfigure git to use HTTP authentication
-        run: >
-          git config --global url."https://github.com/".insteadOf
-          ssh://git@github.com/
-
-      - run: npm ci
-      - run: npm run lint
+        run: sudo apt update && sudo apt install -y cmake build-essential
+      - run: npm install
       - run: npm run build -- --env production
       - name: Build service
         run: |
-          mkdir -p ./service/build
-          pushd ./service/build
-          cmake .. \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_TOOLCHAIN_FILE="${TOOLCHAIN_FILE}"
-          make
-          popd
-          mkdir -p ./dist
-          rm -rf ./dist/service
-          cp -r -T -- ./service/build/dist ./dist/service
-
+          mkdir -p ./service/build && cd ./service/build
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="${{ env.TOOLCHAIN_FILE }}"
+          make && cd ../..
+          mkdir -p ./dist && rm -rf ./dist/service && cp -r -T -- ./service/build/dist ./dist/service
       - name: Copy hyperion.ng into dist/service/hyperion
         run: |
-          ls -R
-          rm -rf ./dist/service/hyperion
+          rm -rf ./dist/service/hyperion && mkdir -p ./dist/service/hyperion
           cp -r -T ./hyperion.ng-build ./dist/service/hyperion
           rm -f ./dist/service/hyperion/flatc
-          ls -R
-
       - name: Ensure executables +x
         run: |
-          chmod +x ./dist/service/autostart.sh
-          chmod +x ./dist/service/loader_service
-          chmod +x ./dist/service/start_hyperiond
-
-          chmod +x ./dist/service/hyperion/hyperiond
-          chmod +x ./dist/service/hyperion/hyperion-remote
-
+          chmod +x ./dist/service/autostart.sh ./dist/service/loader_service ./dist/service/start_hyperiond
+          chmod +x ./dist/service/hyperion/hyperiond ./dist/service/hyperion/hyperion-remote
+          chmod -R +r ./dist/service/hyperion
       - run: npm run package
       - run: npm run gen-manifest
-
-      - name: Upload artifact
+      - name: Upload IPK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: hyperion.ng-ipk
-          path: |
-            ${{github.workspace}}/*.ipk
+          path: ${{ github.workspace }}/*.ipk
 
       - uses: marvinpinto/action-automatic-releases@latest
         if: "github.ref == 'refs/heads/master'"
@@ -259,17 +235,7 @@ jobs:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: latest
           prerelease: true
-          title: "Development Build"
+          title: "Development Build (Qt6)"
           files: |
-            ${{github.workspace}}/*.ipk
-            ${{github.workspace}}/org.webosbrew.hyperion.ng.loader.manifest.json
-
-      - uses: marvinpinto/action-automatic-releases@latest
-        if: "startsWith(github.ref, 'refs/tags/v')"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: false
-          title: ${{ github.ref_name }}
-          files: |
-            ${{github.workspace}}/*.ipk
-            ${{github.workspace}}/org.webosbrew.hyperion.ng.loader.manifest.json
+            ${{ github.workspace }}/*.ipk
+            ${{ github.workspace }}/org.webosbrew.hyperion.ng.loader.manifest.json
